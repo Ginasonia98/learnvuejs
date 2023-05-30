@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD Vue.js</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Custom styles */
+    .container {
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <student-list></student-list>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    // Komponen Vue
+    Vue.component('student-list', {
+      template: `
+        <div class="container mx-auto py-4">
+          <h2 class="text-2xl font-bold mb-4">Data Mahasiswa</h2>
+          <form @submit.prevent="handleSubmit">
+            <div class="flex items-center space-x-2 mb-4">
+              <label for="name" class="w-16">Nama:</label>
+              <input type="text" v-model="currentStudent.name" required class="border border-gray-400 px-2 py-1 rounded">
+            </div>
+            <div class="flex items-center space-x-2 mb-4">
+              <label for="age" class="w-16">Usia:</label>
+              <input type="number" v-model="currentStudent.age" required class="border border-gray-400 px-2 py-1 rounded">
+            </div>
+            <button type="submit" :class="{'bg-blue-500 hover:bg-blue-600': !editing, 'bg-yellow-500 hover:bg-yellow-600': editing}" class="text-white px-4 py-2 rounded">{{ editing ? 'Update' : 'Tambah' }}</button>
+            <button v-if="editing" @click="cancelEdit" class="text-gray-500 hover:text-gray-600 ml-2">Batal</button>
+          </form>
+          <table class="mt-4 w-full">
+            <thead>
+              <tr>
+                <th class="py-2">Nama</th>
+                <th class="py-2">Usia</th>
+                <th class="py-2">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="student in students" :key="student.id">
+                <td class="py-2">{{ student.name }}</td>
+                <td class="py-2">{{ student.age }}</td>
+                <td class="py-2">
+                  <button @click="startEdit(student)" class="text-blue-500 hover:text-blue-600">Edit</button>
+                  <button @click="deleteStudent(student.id)" class="text-red-500 hover:text-red-600 ml-2">Hapus</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `,
+      data() {
+        return {
+          students: [
+            { id: 1, name: "John Doe", age: 20 },
+            { id: 2, name: "Jane Smith", age: 22 },
+            { id: 3, name: "Bob Johnson", age: 19 }
+          ],
+          currentStudent: { id: null, name: "", age: "" },
+          editing: false
+        };
+      },
+      methods: {
+        handleSubmit() {
+          if (this.editing) {
+            this.updateStudent();
+          } else {
+            this.addStudent();
+          }
+        },
+        addStudent() {
+          const maxId = Math.max(...this.students.map(student => student.id));
+          this.students.push({
+            id: maxId + 1,
+            name: this.currentStudent.name,
+            age: this.currentStudent.age
+          });
+          this.resetForm();
+        },
+        startEdit(student) {
+          this.editing = true;
+          this.currentStudent.id = student.id;
+          this.currentStudent.name = student.name;
+          this.currentStudent.age = student.age;
+        },
+        updateStudent() {
+          const index = this.students.findIndex(s => s.id === this.currentStudent.id);
+          if (index !== -1) {
+            this.students.splice(index, 1, { ...this.currentStudent });
+            this.resetForm();
+          }
+        },
+        cancelEdit() {
+          this.resetForm();
+        },
+        deleteStudent(id) {
+          this.students = this.students.filter(student => student.id !== id);
+        },
+        resetForm() {
+          this.editing = false;
+          this.currentStudent.id = null;
+          this.currentStudent.name = "";
+          this.currentStudent.age = "";
+        }
+      }
+    });
+
+    // Membuat instance Vue dan mount ke elemen dengan id "app"
+    new Vue({
+      el: '#app'
+    });
+  </script>
+</body>
+</html>
+
+
+
+<!-- penjelasan
+Kode yang diberikan adalah sebuah halaman HTML dengan Vue.js yang mengimplementasikan operasi CRUD (Create, Read, Update, Delete) pada data mahasiswa. Berikut adalah penjelasan langkah demi langkah dari kode tersebut:
+Kode dimulai dengan deklarasi doctype dan elemen HTML dasar.
+
+Pada bagian <head>, kita mengatur beberapa informasi metadata seperti karakter set dan viewport.
+Di dalam <head>, kita juga memberikan judul untuk halaman dengan menggunakan elemen <title>.
+Setelah itu, kita memuat Vue.js dengan mengimpor skrip dari CDN menggunakan <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>.
+Bagian utama dari aplikasi Vue.js dimulai dengan <body>.
+Di dalam <body>, kita memiliki sebuah elemen dengan id "app" (<div id="app">). Ini adalah tempat di mana aplikasi Vue.js akan di-mount.
+Dalam elemen dengan id "app", kita menggunakan komponen Vue bernama "student-list" dengan sintaks <student-list></student-list>. Komponen ini akan menampilkan data mahasiswa dan menyediakan fitur CRUD.
+Di dalam blok <script>, kita mendefinisikan komponen Vue dengan nama "student-list".
+Komponen "student-list" memiliki template yang berisi struktur HTML untuk menampilkan data mahasiswa. Di dalam template ini, kita memiliki form untuk menambah dan mengedit data, serta tabel untuk menampilkan data mahasiswa.
+Di dalam data komponen, kita memiliki properti "students" yang berisi array objek mahasiswa. Properti ini berisi data awal yang akan ditampilkan.
+Selain itu, kita memiliki properti "currentStudent" yang digunakan untuk menyimpan data mahasiswa yang sedang diedit atau ditambahkan.
+Terdapat pula properti "editing" yang menentukan apakah kita sedang dalam mode pengeditan atau tidak.
+Di dalam metode komponen, kita memiliki beberapa fungsi:
+handleSubmit: Dipanggil ketika form disubmit. Fungsi ini akan menentukan apakah akan memanggil fungsi addStudent() atau updateStudent() berdasarkan kondisi editing.
+addStudent: Menambahkan mahasiswa baru ke array "students" berdasarkan input dari form. Setelah itu, form akan direset dengan memanggil fungsi resetForm().
+startEdit: Menandai bahwa kita sedang dalam mode pengeditan dan mengisi properti "currentStudent" dengan data mahasiswa yang akan diubah.
+updateStudent: Mengupdate data mahasiswa yang sedang diubah dalam array "students" berdasarkan properti "currentStudent". Setelah itu, form akan direset.
+cancelEdit: Membatalkan mode pengeditan dan mereset form.
+deleteStudent: Menghapus data mahasiswa dari array "students" berdasarkan id mahasiswa.
+resetForm: Mereset form dan properti terkait.
+Di luar komponen, kita membuat instance Vue dengan menginisialisasi dengan objek konfigurasi. Objek konfigurasi ini memiliki properti el yang menentukan elemen di mana Vue akan di-mount, dalam hal ini elemen dengan id "app".
+Dengan mengikuti langkah-langkah di atas, kita dapat membangun aplikasi CRUD sederhana dengan Vue.js untuk mengelola data mahasiswa.
+
+
+
+-->
